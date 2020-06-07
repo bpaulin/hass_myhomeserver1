@@ -3,7 +3,7 @@ import logging
 import voluptuous as vol
 
 from homeassistant.components.cover import (
-    CoverDevice,
+    CoverEntity,
     PLATFORM_SCHEMA,
     SUPPORT_OPEN,
     SUPPORT_CLOSE,
@@ -52,7 +52,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     return True
 
 
-class BrownPaperBagCover(CoverDevice, RestoreEntity):
+class BrownPaperBagCover(CoverEntity, RestoreEntity):
     """Representation of BrownPaperBag cover."""
 
     def __init__(self, cover, gate: BpbGate):
