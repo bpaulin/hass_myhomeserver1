@@ -4,7 +4,7 @@ function StartHomeAssistant {
   mkdir /config
 
   echo "Copy configuration.yaml"
-  cp -f .devcontainer/secrets.yaml /config/ || echo ".devcontainer/secrets.yaml are missing!" exit 1
+  cp -f .devcontainer/configuration.yaml /config/ || echo ".devcontainer/configuration.yaml are missing!" exit 1
 
   echo "Copy the custom component"
   rm -R /config/custom_components/ || echo ""
