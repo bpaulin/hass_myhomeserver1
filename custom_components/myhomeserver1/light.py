@@ -2,7 +2,7 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.components.light import Light, PLATFORM_SCHEMA
+from homeassistant.components.light import LightEntity, PLATFORM_SCHEMA
 from homeassistant.const import CONF_NAME, CONF_ADDRESS, CONF_DEVICES
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.restore_state import RestoreEntity
@@ -43,7 +43,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     return True
 
 
-class BrownPaperBagLight(Light, RestoreEntity):
+class BrownPaperBagLight(LightEntity, RestoreEntity):
     """Representation of an BrownPaperBag Light."""
 
     def __init__(self, light, gate: BpbGate):
