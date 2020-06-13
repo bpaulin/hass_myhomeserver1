@@ -9,6 +9,8 @@
 ARG VARIANT="3"
 FROM mcr.microsoft.com/vscode/devcontainers/python:0-${VARIANT}
 
+RUN mkdir -p /root/.ssh && echo "StrictHostKeyChecking no" >> /root/.ssh/config
+
 # [Optional] If your requirements rarely change, uncomment this section to add them to the image.
 #
 # COPY requirements.txt /tmp/pip-tmp/
