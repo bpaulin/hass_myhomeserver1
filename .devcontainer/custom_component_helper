@@ -14,6 +14,10 @@ function StartHomeAssistant {
   hass -c /config
 }
 
+function InstallBrownpaperbagFromGit {
+  pip install --upgrade git+git://github.com/bpaulin/brownpaperbag.git@master
+}
+
 function UpdgradeHomeAssistantDev {
   python -m pip install --upgrade git+git://github.com/home-assistant/home-assistant.git@dev
 }

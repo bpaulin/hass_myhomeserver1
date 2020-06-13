@@ -1,12 +1,12 @@
 {
-    "domain": "myhomeserver1",
-    "name": "myhomeserver1",
-    "documentation": "https://github.com/bpaulin/hass_myhomeserver1",
-    "requirements": [
-      "brownpaperbag==1.0.3"
-    ],
-    "dependencies": [],
-    "codeowners": [
-      "@bpaulin"
-    ]
-  }
+  "domain": "myhomeserver1",
+  "name": "myhomeserver1",
+  "documentation": "https://github.com/bpaulin/hass_myhomeserver1",
+  "requirements": [
+    "brownpaperbag"
+  ],
+  "dependencies": [],
+  "codeowners": [
+    "@bpaulin"
+  ]
+}
