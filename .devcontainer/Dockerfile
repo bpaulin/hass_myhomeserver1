@@ -11,11 +11,9 @@ FROM mcr.microsoft.com/vscode/devcontainers/python:0-${VARIANT}
 
 RUN mkdir -p /root/.ssh && echo "StrictHostKeyChecking no" >> /root/.ssh/config
 
-# [Optional] If your requirements rarely change, uncomment this section to add them to the image.
-#
-# COPY requirements.txt /tmp/pip-tmp/
-# RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt \
-#    && rm -rf /tmp/pip-tmp
+COPY .devcontainer/requirements_dev.txt /tmp/pip-tmp/
+RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements_dev.txt \
+   && rm -rf /tmp/pip-tmp
 RUN pip3 --disable-pip-version-check --no-cache-dir install sqlalchemy colorlog
 RUN pip3 --disable-pip-version-check --no-cache-dir install git+git://github.com/home-assistant/home-assistant.git@dev
 # [Optional] Uncomment this section to install additional packages.
