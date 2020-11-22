@@ -57,7 +57,7 @@ class BrownPaperBagLight(LightEntity, RestoreEntity):
 
     @property
     def should_poll(self) -> bool:
-        return False
+        return True
 
     @property
     def name(self):
@@ -71,11 +71,11 @@ class BrownPaperBagLight(LightEntity, RestoreEntity):
 
     async def async_turn_on(self, **kwargs) -> None:
         """Turn the zone on."""
-        await self._gate.turn_on_light(self._light_id)
+        self._state = await self._gate.turn_on_light(self._light_id)
 
     async def async_turn_off(self, **kwargs) -> None:
         """Turn the zone on."""
-        await self._gate.turn_off_light(self._light_id)
+        self._state = await self._gate.turn_off_light(self._light_id)
 
     async def async_update(self):
         self._state = await self._gate.is_light_on(self._light_id)
