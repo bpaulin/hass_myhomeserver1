@@ -14,7 +14,7 @@
         {
             "label": "Upgrade Home Assistant to latest dev",
             "type": "shell",
-            "command": "source .devcontainer/custom_component_helper && UpdgradeHomeAssistantDev",
+            "command": "source .devcontainer/custom_component_helper && UpgradeHomeAssistantDev",
         },
         {
             "label": "Set Home Assistant Version",

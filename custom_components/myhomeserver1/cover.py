@@ -20,7 +20,6 @@ from brownpaperbag.bpbgate import BpbGate, COVER_CLOSING, COVER_OPENING, COVER_S
 
 DOMAIN = "myhomeserver1"
 WHO_COVER = "2"
-DEPENDENCIES = ["brownpaperbag"]
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -6,9 +6,9 @@ function StartHomeAssistant {
   echo "Copy configuration.yaml"
   cp -f .devcontainer/configuration.yaml /config/ || echo ".devcontainer/configuration.yaml are missing!" exit 1
 
-  echo "Copy the custom component"
-  rm -R /config/custom_components/ || echo ""
-  cp -r custom_components /config/custom_components/ || echo "Could not copy the custom_component" exit 1
+  # echo "Copy the custom component"
+  rm -f /config/custom_components/myhomeserver1
+  ln -f -s /workspaces/hass_myhomeserver1/custom_components/myhomeserver1 /config/custom_components/myhomeserver1
 
   echo "Start Home Assistant"
   hass -c /config
@@ -18,7 +18,7 @@ function InstallBrownpaperbagFromGit {
   pip install --upgrade git+git://github.com/bpaulin/brownpaperbag.git@master
 }
 
-function UpdgradeHomeAssistantDev {
+function UpgradeHomeAssistantDev {
   python -m pip install --upgrade git+git://github.com/home-assistant/home-assistant.git@dev
 }
 

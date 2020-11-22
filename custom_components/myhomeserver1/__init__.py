@@ -9,8 +9,6 @@ _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "myhomeserver1"
 
-REQUIREMENTS = ["brownpaperbag"]
-
 CONFIG_SCHEMA = vol.Schema(
     {
         DOMAIN: vol.Schema(
@@ -26,15 +24,15 @@ CONFIG_SCHEMA = vol.Schema(
 
 
 async def async_listen_events(hass, config):
-    from brownpaperbag import BpbGate, SESSION_EVENT
+    from brownpaperbag import BpbEventSession
 
-    gate = BpbGate(
+    gate = BpbEventSession(
         config[DOMAIN].get(CONF_HOST),
         config[DOMAIN].get(CONF_PORT),
         config[DOMAIN].get(CONF_PASSWORD),
     )
     gate.logger = _LOGGER
-    await gate.command_session(SESSION_EVENT)
+    await gate.connect()
     while True:
         (who, what, where) = await gate.readevent_exploded()
         try:
@@ -44,15 +42,15 @@ async def async_listen_events(hass, config):
 
 
 async def async_setup(hass, config):
-    from brownpaperbag import BpbGate
+    from brownpaperbag import BpbCommandSession
 
-    gate = BpbGate(
+    gate = BpbCommandSession(
         config[DOMAIN].get(CONF_HOST),
         config[DOMAIN].get(CONF_PORT),
         config[DOMAIN].get(CONF_PASSWORD),
     )
     hass.data[DOMAIN] = {"gate": gate}
     gate.logger = _LOGGER
-    await gate.command_session()
+    await gate.connect()
     hass.loop.create_task(async_listen_events(hass, config))
     return True

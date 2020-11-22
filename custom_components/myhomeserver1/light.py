@@ -6,12 +6,10 @@ from homeassistant.components.light import LightEntity, PLATFORM_SCHEMA
 from homeassistant.const import CONF_NAME, CONF_ADDRESS, CONF_DEVICES
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.restore_state import RestoreEntity
-from brownpaperbag import BpbGate
+from brownpaperbag.bpbgate import BpbGate
 
 DOMAIN = "myhomeserver1"
 WHO_LIGHT = "1"
-
-DEPENDENCIES = ["brownpaperbag"]
 
 _LOGGER = logging.getLogger(__name__)
 
