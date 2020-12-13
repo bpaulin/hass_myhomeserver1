@@ -7,8 +7,8 @@ function StartHomeAssistant {
   cp -f .devcontainer/configuration.yaml /config/ || echo ".devcontainer/configuration.yaml are missing!" exit 1
 
   # echo "Copy the custom component"
-  rm -f /config/custom_components/myhomeserver1
-  ln -f -s /workspaces/hass_myhomeserver1/custom_components/myhomeserver1 /config/custom_components/myhomeserver1
+  rm -f /config/custom_components
+  ln -f -s /workspaces/hass_myhomeserver1/custom_components /config/custom_components
 
   echo "Start Home Assistant"
   hass -c /config

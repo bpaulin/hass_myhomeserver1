@@ -1,9 +1,11 @@
-import logging
-import voluptuous as vol
+"""Myhomeserver1 home assistant integration."""
 import asyncio
+import logging
 
-from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_PORT
 import homeassistant.helpers.config_validation as cv
+import voluptuous as vol
+from brownpaperbag import BpbCommandSession, BpbEventSession
+from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_PORT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,8 +26,7 @@ CONFIG_SCHEMA = vol.Schema(
 
 
 async def async_listen_events(hass, config):
-    from brownpaperbag import BpbEventSession
-
+    """Listen to myhomserver1 events."""
     gate = BpbEventSession(
         config[DOMAIN].get(CONF_HOST),
         config[DOMAIN].get(CONF_PORT),
@@ -42,8 +43,7 @@ async def async_listen_events(hass, config):
 
 
 async def async_setup(hass, config):
-    from brownpaperbag import BpbCommandSession
-
+    """Set up component."""
     gate = BpbCommandSession(
         config[DOMAIN].get(CONF_HOST),
         config[DOMAIN].get(CONF_PORT),

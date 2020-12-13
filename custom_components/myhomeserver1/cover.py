@@ -17,8 +17,8 @@ from datetime import datetime, timedelta
 from homeassistant.helpers.event import async_track_point_in_time
 from homeassistant.helpers.restore_state import RestoreEntity
 from brownpaperbag.bpbgate import BpbGate, COVER_CLOSING, COVER_OPENING, COVER_STOPPED
+from . import DOMAIN
 
-DOMAIN = "myhomeserver1"
 WHO_COVER = "2"
 
 _LOGGER = logging.getLogger(__name__)

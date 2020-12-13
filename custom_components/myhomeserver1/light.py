@@ -1,14 +1,13 @@
 import logging
 
-import voluptuous as vol
-
-from homeassistant.components.light import LightEntity, PLATFORM_SCHEMA
-from homeassistant.const import CONF_NAME, CONF_ADDRESS, CONF_DEVICES
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.restore_state import RestoreEntity
+import voluptuous as vol
 from brownpaperbag.bpbgate import BpbGate
+from homeassistant.components.light import PLATFORM_SCHEMA, LightEntity
+from homeassistant.const import CONF_ADDRESS, CONF_DEVICES, CONF_NAME
+from homeassistant.helpers.restore_state import RestoreEntity
+from . import DOMAIN
 
-DOMAIN = "myhomeserver1"
 WHO_LIGHT = "1"
 
 _LOGGER = logging.getLogger(__name__)
