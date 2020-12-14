@@ -12,19 +12,19 @@ WHO_LIGHT = "1"
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_DEVICES): vol.All(
-            cv.ensure_list,
-            [
-                {
-                    vol.Required(CONF_NAME): cv.string,
-                    vol.Required(CONF_ADDRESS): cv.string,
-                }
-            ],
-        )
-    }
-)
+# PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
+#     {
+#         vol.Optional(CONF_DEVICES): vol.All(
+#             cv.ensure_list,
+#             [
+#                 {
+#                     vol.Required(CONF_NAME): cv.string,
+#                     vol.Required(CONF_ADDRESS): cv.string,
+#                 }
+#             ],
+#         )
+#     }
+# )
 
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
@@ -32,7 +32,10 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     gate_data = hass.data[DOMAIN]
     gate = gate_data["gate"]
     hass.data[DOMAIN][WHO_LIGHT] = {}
-    hass_lights = [BrownPaperBagLight(light, gate) for light in config[CONF_DEVICES]]
+
+    gate_light_ids = await gate.get_light_ids()
+    hass_lights = [BrownPaperBagLight(light, gate) for light in gate_light_ids.keys()]
+
     for hass_light in hass_lights:
         hass.data[DOMAIN][WHO_LIGHT][hass_light.light_id] = hass_light
 
@@ -43,11 +46,11 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 class BrownPaperBagLight(LightEntity, RestoreEntity):
     """Representation of an BrownPaperBag Light."""
 
-    def __init__(self, light, gate: BpbGate):
+    def __init__(self, light_address, gate: BpbGate):
         """Initialize an BrownPaperBageLight."""
         self._gate = gate
-        self._light_id = light[CONF_ADDRESS]
-        self._name = "myhomeserver1_" + light[CONF_NAME]
+        self._light_id = light_address
+        self._name = "myhomeserver1_" + light_address
         self._state = None
 
     @property

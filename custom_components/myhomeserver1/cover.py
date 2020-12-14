@@ -23,27 +23,17 @@ WHO_COVER = "2"
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_DEVICES): vol.All(
-            cv.ensure_list,
-            [
-                {
-                    vol.Required(CONF_NAME): cv.string,
-                    vol.Required(CONF_ADDRESS): cv.string,
-                }
-            ],
-        )
-    }
-)
-
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Setup the BrownPaperBage Cover platform."""
     gate_data = hass.data[DOMAIN]
     gate = gate_data["gate"]
     hass.data[DOMAIN][WHO_COVER] = {}
-    hass_covers = [BrownPaperBagCover(cover, gate) for cover in config[CONF_DEVICES]]
+
+    gate_cover_ids = await gate.get_cover_ids()
+
+    hass_covers = [BrownPaperBagCover(cover, gate) for cover in gate_cover_ids.keys()]
+    # _LOGGER.warning(hass_covers)
     for hass_cover in hass_covers:
         hass.data[DOMAIN][WHO_COVER][hass_cover.cover_id] = hass_cover
 
@@ -54,12 +44,12 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 class BrownPaperBagCover(CoverEntity, RestoreEntity):
     """Representation of BrownPaperBag cover."""
 
-    def __init__(self, cover, gate: BpbGate):
+    def __init__(self, cover_address, gate: BpbGate):
         """Initialize the cover."""
         self._course_duration = 25
         self._gate = gate
-        self._cover_id = cover[CONF_ADDRESS]
-        self._name = "myhomeserver1_" + cover[CONF_NAME]
+        self._cover_id = cover_address
+        self._name = "myhomeserver1_" + cover_address
         self._state = None
         self._listener = None
         self._last_received = None
@@ -72,7 +62,7 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
 
     @property
     def should_poll(self) -> bool:
-        return False
+        return True
 
     @property
     def name(self):

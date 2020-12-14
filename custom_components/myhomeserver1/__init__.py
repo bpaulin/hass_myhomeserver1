@@ -32,7 +32,7 @@ async def async_listen_events(hass, config):
         config[DOMAIN].get(CONF_PORT),
         config[DOMAIN].get(CONF_PASSWORD),
     )
-    gate.logger = _LOGGER
+    # gate.logger = logging.getLogger(__name__ + ".event")
     await gate.connect()
     while True:
         (who, what, where) = await gate.readevent_exploded()
