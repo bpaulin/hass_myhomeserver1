@@ -1,6 +1,6 @@
 repository:
   description: myhomeserver1 home assistant integration
-  topics: myhomeserver1, homeassistant
+  topics: myhomeserver1, homeassistant, legrand, btcino
 
   has_issues: true
   has_projects: false
