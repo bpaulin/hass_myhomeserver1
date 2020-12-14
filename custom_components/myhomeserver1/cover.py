@@ -56,7 +56,7 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
 
     @property
     def should_poll(self) -> bool:
-        return True
+        return False
 
     @property
     def name(self):
@@ -86,6 +86,10 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
     @property
     def is_opening(self):
         return self._state == COVER_OPENING
+
+    @property
+    def is_closed(self):
+        return None
 
     @property
     def current_cover_position(self):
