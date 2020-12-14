@@ -24,16 +24,17 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     gate_cover_ids = await gate.get_cover_ids()
 
-    hass_covers = [
-        BrownPaperBagCover(cover, gate, config.get(CONF_EVENT))
-        for cover in gate_cover_ids.keys()
-    ]
-
     if config.get(CONF_EVENT):
         hass.data[DOMAIN][WHO_COVER] = {}
+        hass_covers = [
+            BrownPaperBagPushCover(cover, gate) for cover in gate_cover_ids.keys()
+        ]
         for hass_cover in hass_covers:
             hass.data[DOMAIN][WHO_COVER][hass_cover.cover_id] = hass_cover
-
+    else:
+        hass_covers = [
+            BrownPaperBagCover(cover, gate) for cover in gate_cover_ids.keys()
+        ]
     async_add_entities(hass_covers)
     return True
 
@@ -41,21 +42,12 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 class BrownPaperBagCover(CoverEntity, RestoreEntity):
     """Representation of BrownPaperBag cover."""
 
-    # pylint: disable=too-many-instance-attributes
-
-    def __init__(self, cover_address, gate: BpbGate, receiver):
+    def __init__(self, cover_address, gate: BpbGate):
         """Initialize the cover."""
-        self._course_duration = 25
         self._gate = gate
         self._cover_id = cover_address
         self._name = "myhomeserver1_" + cover_address
         self._state = None
-
-        self._listener = None
-        self._last_received = None
-        self._last_position = 99
-        self._expect_change = False
-        self._receiver = receiver
 
     @property
     def cover_id(self):
@@ -64,34 +56,23 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
 
     @property
     def should_poll(self) -> bool:
-        return not self._receiver
+        return False
 
     @property
     def name(self):
         """Return the name of the cover."""
         return self._name
 
-    def _cancel_listener(self):
-        if self._listener:
-            self._listener()
-            self._listener = None
-
     async def async_open_cover(self, **kwargs):
         """Move the cover."""
-        self._expect_change = True
-        self._cancel_listener()
         self._state = await self._gate.open_cover(self._cover_id)
 
     async def async_close_cover(self, **kwargs):
         """Move the cover down."""
-        self._expect_change = True
-        self._cancel_listener()
         self._state = await self._gate.close_cover(self._cover_id)
 
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""
-        self._expect_change = True
-        self._cancel_listener()
         self._state = await self._gate.stop_cover(self._cover_id)
 
     async def async_update(self):
@@ -108,9 +89,55 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
 
     @property
     def is_closed(self):
-        if self._receiver:
-            return self.current_cover_position <= 0
         return None
+
+    @property
+    def current_cover_position(self):
+        return None
+
+
+class BrownPaperBagPushCover(BrownPaperBagCover):
+    """Representation of BrownPaperBag cover (local pushing)."""
+
+    def __init__(self, cover_address, gate: BpbGate):
+        """Initialize the cover."""
+        super().__init__(cover_address, gate)
+        self._course_duration = 25
+        self._listener = None
+        self._last_received = None
+        self._last_position = 99
+        self._expect_change = False
+
+    @property
+    def should_poll(self) -> bool:
+        return False
+
+    @property
+    def is_closed(self):
+        return self.current_cover_position <= 0
+
+    def _cancel_listener(self):
+        if self._listener:
+            self._listener()
+            self._listener = None
+
+    async def async_open_cover(self, **kwargs):
+        """Move the cover."""
+        self._expect_change = True
+        self._cancel_listener()
+        self._state = await super().async_open_cover()
+
+    async def async_close_cover(self, **kwargs):
+        """Move the cover down."""
+        self._expect_change = True
+        self._cancel_listener()
+        self._state = await super().async_close_cover()
+
+    async def async_stop_cover(self, **kwargs):
+        """Stop the cover."""
+        self._expect_change = True
+        self._cancel_listener()
+        self._state = await super().async_stop_cover()
 
     async def receive_gate_state(self, bpb_state):
         """Callback to receive state from myhomeserver1."""
@@ -134,9 +161,7 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
 
     @property
     def current_cover_position(self):
-        if self._receiver:
-            return self._last_position
-        return None
+        return self._last_position
 
     async def async_set_cover_position(self, **kwargs):
         """Move the cover to a specific position."""
@@ -173,9 +198,6 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
         """Call when entity about to be added to hass."""
         # If not None, we got an initial value.
         await super().async_added_to_hass()
-        if self._state is not None:
-            return
-
         state = await self.async_get_last_state()
-        if self._receiver and state:
+        if state:
             self._last_position = state.as_dict()["attributes"]["current_position"]

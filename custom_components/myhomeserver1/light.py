@@ -12,20 +12,6 @@ WHO_LIGHT = "1"
 
 _LOGGER = logging.getLogger(__name__)
 
-# PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-#     {
-#         vol.Optional(CONF_DEVICES): vol.All(
-#             cv.ensure_list,
-#             [
-#                 {
-#                     vol.Required(CONF_NAME): cv.string,
-#                     vol.Required(CONF_ADDRESS): cv.string,
-#                 }
-#             ],
-#         )
-#     }
-# )
-
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     # pylint: disable=unused-argument
@@ -35,16 +21,17 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     gate_light_ids = await gate.get_light_ids()
 
-    hass_lights = [
-        BrownPaperBagLight(light, gate, config.get(CONF_EVENT))
-        for light in gate_light_ids.keys()
-    ]
-
     if config.get(CONF_EVENT):
         hass.data[DOMAIN][WHO_LIGHT] = {}
+        hass_lights = [
+            BrownPaperBagPushLight(light, gate) for light in gate_light_ids.keys()
+        ]
         for hass_light in hass_lights:
             hass.data[DOMAIN][WHO_LIGHT][hass_light.light_id] = hass_light
-
+    else:
+        hass_lights = [
+            BrownPaperBagLight(light, gate) for light in gate_light_ids.keys()
+        ]
     async_add_entities(hass_lights)
     return True
 
@@ -52,13 +39,11 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 class BrownPaperBagLight(LightEntity, RestoreEntity):
     """Representation of an BrownPaperBag Light."""
 
-    def __init__(self, light_address, gate: BpbGate, receiving):
+    def __init__(self, light_address, gate: BpbGate):
         """Initialize an BrownPaperBageLight."""
         self._gate = gate
         self._light_id = light_address
-        self._name = "myhomeserver1_" + light_address
         self._state = None
-        self._receiving = receiving
 
     @property
     def light_id(self):
@@ -67,12 +52,12 @@ class BrownPaperBagLight(LightEntity, RestoreEntity):
 
     @property
     def should_poll(self) -> bool:
-        return not self._receiving
+        return True
 
     @property
     def name(self):
         """Return the display name of this light."""
-        return self._name
+        return "myhomeserver1_" + self._light_id
 
     @property
     def is_on(self):
@@ -91,11 +76,6 @@ class BrownPaperBagLight(LightEntity, RestoreEntity):
         """Get state from myhomeserver1."""
         self._state = await self._gate.is_light_on(self._light_id)
 
-    async def receive_gate_state(self, bpb_state):
-        """Callback to receive state from myhomeserver1."""
-        self._state = bpb_state == "1"
-        await self.async_update_ha_state()
-
     async def async_added_to_hass(self):
         """Call when entity about to be added to hass."""
         # If not None, we got an initial value.
@@ -104,3 +84,16 @@ class BrownPaperBagLight(LightEntity, RestoreEntity):
         if not state:
             return
         self._state = state.state == "on"
+
+
+class BrownPaperBagPushLight(BrownPaperBagLight):
+    """Representation of an BrownPaperBag Light (local pushing)."""
+
+    async def receive_gate_state(self, bpb_state):
+        """Callback to receive state from myhomeserver1."""
+        self._state = bpb_state == "1"
+        await self.async_update_ha_state()
+
+    @property
+    def should_poll(self) -> bool:
+        return False
