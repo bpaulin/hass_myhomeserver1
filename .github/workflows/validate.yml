@@ -23,6 +23,5 @@ jobs:
       run: |
         black --check .
         bandit -r custom_components
-        pylint custom_components
 
     - uses: home-assistant/actions/hassfest@master
