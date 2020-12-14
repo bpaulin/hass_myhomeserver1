@@ -88,10 +88,6 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
         return self._state == COVER_OPENING
 
     @property
-    def is_closed(self):
-        return None
-
-    @property
     def current_cover_position(self):
         return None
 
