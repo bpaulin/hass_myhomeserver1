@@ -1,4 +1,7 @@
 bump2version==1.0.1
 pip-upgrader==1.4.15
 black==20.8b1
-bandit==1.6.2
+bandit==1.7.0
+pylint==2.6.0
+homeassistant==2020.12.0
+brownpaperbag==2.0.3
