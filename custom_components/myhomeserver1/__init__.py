@@ -5,7 +5,7 @@ import logging
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from brownpaperbag import BpbCommandSession, BpbEventSession
-from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_PORT
+from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_PORT, CONF_EVENT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,6 +18,7 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Required(CONF_HOST): cv.string,
                 vol.Required(CONF_PASSWORD): cv.string,
                 vol.Optional(CONF_PORT, default=20000): cv.positive_int,
+                vol.Optional(CONF_EVENT, default=False): cv.boolean,
             }
         )
     },
@@ -52,5 +53,6 @@ async def async_setup(hass, config):
     hass.data[DOMAIN] = {"gate": gate}
     gate.logger = _LOGGER
     await gate.connect()
-    hass.loop.create_task(async_listen_events(hass, config))
+    if config[DOMAIN].get(CONF_EVENT):
+        hass.loop.create_task(async_listen_events(hass, config))
     return True

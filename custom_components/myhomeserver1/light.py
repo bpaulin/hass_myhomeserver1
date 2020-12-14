@@ -4,7 +4,7 @@ import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from brownpaperbag.bpbgate import BpbGate
 from homeassistant.components.light import PLATFORM_SCHEMA, LightEntity
-from homeassistant.const import CONF_ADDRESS, CONF_DEVICES, CONF_NAME
+from homeassistant.const import CONF_ADDRESS, CONF_DEVICES, CONF_NAME, CONF_EVENT
 from homeassistant.helpers.restore_state import RestoreEntity
 from . import DOMAIN
 
@@ -34,10 +34,15 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     hass.data[DOMAIN][WHO_LIGHT] = {}
 
     gate_light_ids = await gate.get_light_ids()
-    hass_lights = [BrownPaperBagLight(light, gate) for light in gate_light_ids.keys()]
 
-    for hass_light in hass_lights:
-        hass.data[DOMAIN][WHO_LIGHT][hass_light.light_id] = hass_light
+    hass_lights = [
+        BrownPaperBagLight(light, gate, config.get(CONF_EVENT))
+        for light in gate_light_ids.keys()
+    ]
+
+    if config.get(CONF_EVENT):
+        for hass_light in hass_lights:
+            hass.data[DOMAIN][WHO_LIGHT][hass_light.light_id] = hass_light
 
     async_add_entities(hass_lights)
     return True
@@ -46,12 +51,13 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 class BrownPaperBagLight(LightEntity, RestoreEntity):
     """Representation of an BrownPaperBag Light."""
 
-    def __init__(self, light_address, gate: BpbGate):
+    def __init__(self, light_address, gate: BpbGate, receiving):
         """Initialize an BrownPaperBageLight."""
         self._gate = gate
         self._light_id = light_address
         self._name = "myhomeserver1_" + light_address
         self._state = None
+        self._receiving = receiving
 
     @property
     def light_id(self):
@@ -59,7 +65,7 @@ class BrownPaperBagLight(LightEntity, RestoreEntity):
 
     @property
     def should_poll(self) -> bool:
-        return True
+        return not self._receiving
 
     @property
     def name(self):

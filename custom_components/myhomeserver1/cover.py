@@ -11,7 +11,7 @@ from homeassistant.components.cover import (
     STATE_OPENING,
     STATE_CLOSING,
 )
-from homeassistant.const import CONF_NAME, CONF_ADDRESS, CONF_DEVICES
+from homeassistant.const import CONF_NAME, CONF_ADDRESS, CONF_DEVICES, CONF_EVENT
 import homeassistant.helpers.config_validation as cv
 from datetime import datetime, timedelta
 from homeassistant.helpers.event import async_track_point_in_time
@@ -32,10 +32,14 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     gate_cover_ids = await gate.get_cover_ids()
 
-    hass_covers = [BrownPaperBagCover(cover, gate) for cover in gate_cover_ids.keys()]
-    # _LOGGER.warning(hass_covers)
-    for hass_cover in hass_covers:
-        hass.data[DOMAIN][WHO_COVER][hass_cover.cover_id] = hass_cover
+    hass_covers = [
+        BrownPaperBagCover(cover, gate, config.get(CONF_EVENT))
+        for cover in gate_cover_ids.keys()
+    ]
+
+    if config.get(CONF_EVENT):
+        for hass_cover in hass_covers:
+            hass.data[DOMAIN][WHO_COVER][hass_cover.cover_id] = hass_cover
 
     async_add_entities(hass_covers)
     return True
@@ -44,7 +48,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 class BrownPaperBagCover(CoverEntity, RestoreEntity):
     """Representation of BrownPaperBag cover."""
 
-    def __init__(self, cover_address, gate: BpbGate):
+    def __init__(self, cover_address, gate: BpbGate, receiver):
         """Initialize the cover."""
         self._course_duration = 25
         self._gate = gate
@@ -55,6 +59,7 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
         self._last_received = None
         self._last_position = 99
         self._expect_change = False
+        self._receiver = receiver
 
     @property
     def cover_id(self):
@@ -62,7 +67,7 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
 
     @property
     def should_poll(self) -> bool:
-        return True
+        return not self._receiver
 
     @property
     def name(self):
@@ -78,19 +83,19 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
         """Move the cover."""
         self._expect_change = True
         self.cancel_listener()
-        await self._gate.open_cover(self._cover_id)
+        self._state = await self._gate.open_cover(self._cover_id)
 
     async def async_close_cover(self, **kwargs):
         """Move the cover down."""
         self._expect_change = True
         self.cancel_listener()
-        await self._gate.close_cover(self._cover_id)
+        self._state = await self._gate.close_cover(self._cover_id)
 
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""
         self._expect_change = True
         self.cancel_listener()
-        await self._gate.stop_cover(self._cover_id)
+        self._state = await self._gate.stop_cover(self._cover_id)
 
     async def async_update(self):
         """Retrieve latest state."""
@@ -106,7 +111,9 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
 
     @property
     def is_closed(self):
-        return self.current_cover_position <= 0
+        if self._receiver:
+            return self.current_cover_position <= 0
+        return None
 
     async def receive_gate_state(self, bpb_state):
         this_call = datetime.now()
@@ -129,7 +136,9 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
 
     @property
     def current_cover_position(self):
-        return self._last_position
+        if self._receiver:
+            return self._last_position
+        return None
 
     async def async_set_cover_position(self, position):
         """Move the cover to a specific position."""
@@ -169,5 +178,5 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
             return
 
         state = await self.async_get_last_state()
-        if state:
+        if self._receiver and state:
             self._last_position = state.as_dict()["attributes"]["current_position"]
