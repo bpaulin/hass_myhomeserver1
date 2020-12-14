@@ -56,7 +56,7 @@ class BrownPaperBagCover(CoverEntity, RestoreEntity):
 
     @property
     def should_poll(self) -> bool:
-        return False
+        return True
 
     @property
     def name(self):
