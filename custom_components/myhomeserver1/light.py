@@ -1,11 +1,11 @@
+"""Myhomeserver1 home assistant light integration."""
 import logging
 
-import homeassistant.helpers.config_validation as cv
-import voluptuous as vol
 from brownpaperbag.bpbgate import BpbGate
-from homeassistant.components.light import PLATFORM_SCHEMA, LightEntity
-from homeassistant.const import CONF_ADDRESS, CONF_DEVICES, CONF_NAME, CONF_EVENT
+from homeassistant.components.light import LightEntity
+from homeassistant.const import CONF_EVENT
 from homeassistant.helpers.restore_state import RestoreEntity
+
 from . import DOMAIN
 
 WHO_LIGHT = "1"
@@ -28,10 +28,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+    # pylint: disable=unused-argument
     """Setup the BrownPaperBage Light platform."""
     gate_data = hass.data[DOMAIN]
     gate = gate_data["gate"]
-    hass.data[DOMAIN][WHO_LIGHT] = {}
 
     gate_light_ids = await gate.get_light_ids()
 
@@ -41,6 +41,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     ]
 
     if config.get(CONF_EVENT):
+        hass.data[DOMAIN][WHO_LIGHT] = {}
         for hass_light in hass_lights:
             hass.data[DOMAIN][WHO_LIGHT][hass_light.light_id] = hass_light
 
@@ -61,6 +62,7 @@ class BrownPaperBagLight(LightEntity, RestoreEntity):
 
     @property
     def light_id(self):
+        """Myhomeserver1 light id."""
         return self._light_id
 
     @property
@@ -78,17 +80,19 @@ class BrownPaperBagLight(LightEntity, RestoreEntity):
         return self._state
 
     async def async_turn_on(self, **kwargs) -> None:
-        """Turn the zone on."""
+        """Turn the light on."""
         self._state = await self._gate.turn_on_light(self._light_id)
 
     async def async_turn_off(self, **kwargs) -> None:
-        """Turn the zone on."""
+        """Turn the light off."""
         self._state = await self._gate.turn_off_light(self._light_id)
 
     async def async_update(self):
+        """Get state from myhomeserver1."""
         self._state = await self._gate.is_light_on(self._light_id)
 
     async def receive_gate_state(self, bpb_state):
+        """Callback to receive state from myhomeserver1."""
         self._state = bpb_state == "1"
         await self.async_update_ha_state()
 
