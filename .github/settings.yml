@@ -1,3 +1,10 @@
 repository:
   description: myhomeserver1 home assistant integration
   topics: myhomeserver1, homeassistant
+
+  has_issues: true
+  has_projects: false
+  has_wiki: false
+  has_downloads: true
+
+  default_branch: master
