@@ -37,10 +37,7 @@ async def async_listen_events(hass, config):
     await gate.connect()
     await asyncio.sleep(10)
     while True:
-        try:
-            (who, what, where) = await gate.readevent_exploded()
-        except Exception as e:
-            _LOGGER.error("fail to read gateway event ")
+        (who, what, where) = await gate.readevent_exploded()
         try:
             await hass.data[DOMAIN][who][where].receive_gate_state(what)
         except KeyError:
