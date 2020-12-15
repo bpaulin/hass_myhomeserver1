@@ -24,7 +24,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     gate_cover_ids = await gate.get_cover_ids()
 
-    if config.get(CONF_EVENT):
+    if gate_data[CONF_EVENT]:
         hass.data[DOMAIN][WHO_COVER] = {}
         hass_covers = [
             BrownPaperBagPushCover(cover, gate) for cover in gate_cover_ids.keys()
@@ -200,4 +200,7 @@ class BrownPaperBagPushCover(BrownPaperBagCover):
         await super().async_added_to_hass()
         state = await self.async_get_last_state()
         if state:
-            self._last_position = state.as_dict()["attributes"]["current_position"]
+            try:
+                self._last_position = state.as_dict()["attributes"]["current_position"]
+            except KeyError:
+                pass

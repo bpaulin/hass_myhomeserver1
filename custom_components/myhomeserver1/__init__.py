@@ -33,14 +33,18 @@ async def async_listen_events(hass, config):
         config[DOMAIN].get(CONF_PORT),
         config[DOMAIN].get(CONF_PASSWORD),
     )
-    # gate.logger = logging.getLogger(__name__ + ".event")
+    gate.logger = _LOGGER
     await gate.connect()
+    await asyncio.sleep(10)
     while True:
-        (who, what, where) = await gate.readevent_exploded()
+        try:
+            (who, what, where) = await gate.readevent_exploded()
+        except Exception as e:
+            _LOGGER.error("fail to read gateway event ")
         try:
             await hass.data[DOMAIN][who][where].receive_gate_state(what)
         except KeyError:
-            continue
+            _LOGGER.debug("wrong event who:%s what:%s where:%s", who, what, where)
 
 
 async def async_setup(hass, config):
@@ -50,8 +54,9 @@ async def async_setup(hass, config):
         config[DOMAIN].get(CONF_PORT),
         config[DOMAIN].get(CONF_PASSWORD),
     )
-    hass.data[DOMAIN] = {"gate": gate}
+    hass.data[DOMAIN] = {"gate": gate, "event": config[DOMAIN].get(CONF_EVENT)}
     gate.logger = _LOGGER
+    _LOGGER.warning(config[DOMAIN].get(CONF_EVENT))
     await gate.connect()
     if config[DOMAIN].get(CONF_EVENT):
         hass.loop.create_task(async_listen_events(hass, config))

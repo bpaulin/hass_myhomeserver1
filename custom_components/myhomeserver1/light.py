@@ -20,8 +20,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     gate = gate_data["gate"]
 
     gate_light_ids = await gate.get_light_ids()
-
-    if config.get(CONF_EVENT):
+    if gate_data[CONF_EVENT]:
         hass.data[DOMAIN][WHO_LIGHT] = {}
         hass_lights = [
             BrownPaperBagPushLight(light, gate) for light in gate_light_ids.keys()
@@ -40,7 +39,7 @@ class BrownPaperBagLight(LightEntity, RestoreEntity):
     """Representation of an BrownPaperBag Light."""
 
     def __init__(self, light_address, gate: BpbGate):
-        """Initialize an BrownPaperBageLight."""
+        """Initialize an BrownPaperBagLight."""
         self._gate = gate
         self._light_id = light_address
         self._state = None
