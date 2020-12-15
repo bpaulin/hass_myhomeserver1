@@ -3,7 +3,7 @@
   "name": "myhomeserver1",
   "documentation": "https://github.com/bpaulin/hass_myhomeserver1",
   "requirements": [
-    "brownpaperbag"
+    "brownpaperbag==2.0.4"
   ],
   "dependencies": [],
   "codeowners": [
