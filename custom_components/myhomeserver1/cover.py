@@ -167,9 +167,9 @@ class BrownPaperBagPushCover(BrownPaperBagCover):
         """Move the cover to a specific position."""
         position = kwargs["position"]
         if position < 5:
-            return self.close_cover()
+            return await self.async_close_cover()
         if position > 95:
-            return self.open_cover()
+            return await self.async_open_cover()
         await self.async_stop_cover()
 
         async def handle_event(event):
